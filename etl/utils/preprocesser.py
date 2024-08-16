@@ -1,9 +1,18 @@
 import tiktoken
 import datetime
 
+def resolute(content):
+    discriminators=["DECRETA", "RESUELVE", "DECIDE"]
+    for d in discriminators:
+        splitted_content = content.split(d)
+        if len(splitted_content) == 2 :
+            return splitted_content[1]
+    return content
+
+
 def chop(
-    text: str, 
-    chunk_size=4000, 
+    text: str,
+    chunk_size=4000,
     overlap=200,
 ) -> list:
     """
@@ -21,13 +30,13 @@ def chop(
 
     tokens = encoding.encode(text)
     num_tokens = len(tokens)
-    
+
     chunks = []
     for i in range(0, num_tokens, chunk_size - overlap):
         chunk = tokens[i:i + chunk_size]
         chunks.append(chunk)
     chunks = [encoding.decode(chunk) for chunk in chunks]
-    
+
     return chunks
 
 def transform_date(
@@ -40,7 +49,7 @@ def transform_date(
     output format.
     Parameters:
     * date: desired str date to transofrm
-    * input_format: original date format 
+    * input_format: original date format
     * output_format: desired date format
     Returns:
     New str date with desired format.

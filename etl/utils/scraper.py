@@ -15,10 +15,15 @@ def today_urls():
     soup = BeautifulSoup(page.content, "html.parser")
     body = soup.find(id='avisosSeccionDiv')
 
-    urls = [
+    all_urls = [
         base_url + a['href']
         for a in body.find_all("a", href=True)
     ]
+
+    urls=[]
+    for u in all_urls:
+        if u.find("?") == -1:
+            urls.append(u)
 
     return urls, status
 
@@ -32,13 +37,18 @@ def scrape_article(article_url):
 
     soup = BeautifulSoup(page.content, "html.parser")
 
+    title = soup.find(id="tituloDetalleAviso")
+    if title.find("h2") == None:
+        title = ""
+    else:
+        title = title.find("h2").text
+
     area = soup.find(id="tituloDetalleAviso")
     area = area.find("h1").text
 
     type = soup.find(class_="puntero first-section")
     type = type.text
-    
+
     content = soup.find(id="cuerpoDetalleAviso").text
 
-    return type, area, content, status
-
+    return type, area, content, title, status

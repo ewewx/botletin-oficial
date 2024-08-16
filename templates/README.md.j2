@@ -1,20 +1,18 @@
-# Boletín  Oficial en Criollo
-
-Esta página tiene un resumen de lo más importante del Boletín Oficial(Primera Sección). 
-Aplica Web Scraping sobre las publicaciones del día, y las pasa por un LLM(GPT 3.5) para obtener una versión resumida de lo másimportante! :fire:
-
-## Lo importante del {{today}}
-
+<h1>Botletin Oficial Chequeado</h1>
+<br>
+Esta página tiene un resumen de lo más importante del Boletín Oficial.
+Aplica Web Scraping sobre las publicaciones del día, y las pasa por un LLM(GPT 3.5) para obtener una versión resumida de lo másimportante!
+<br>
+<h2> Lo importante del {{today}} </h2>
+<br>
 {% for type in types %}
-### {{type}}
+<h3> {{type}} </h3>
 {% for result in results %}{% if result.type == type %}
-#### {{result.area}}
+<h4> {{result.area}} </h4>
+<h3> {{result.title}} </h3>
 
-{{result.summary}}
+<p>{{result.summary}}</p>
 
-Importancia: {{result.score}}
+<a href="{{result.url}}">Link a artículo completo </a> <br> <br>
 
-Tags: {% for tag in result.tags %}{{tag}}, {% endfor %}
-
-[Link a artículo completo]({{result.url}})
 {% endif %}{% endfor %}{% endfor %}
