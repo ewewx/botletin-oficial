@@ -1,14 +1,27 @@
-from sqlalchemy import create_engine, Column, Integer, String, Date, JSON
+from sqlalchemy import create_engine, Column, Integer, String, Date, JSON, ForeignKey, Enum
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import relationship
 
-# Database setup
-SQLALCHEMY_DATABASE_URL = "sqlite:///./boletinoficial.db"
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+import enum
 Base = declarative_base()
 
-# SQLAlchemy model
+class ChargeChangeType(enum.Enum):
+    ALTA = "Alta"
+    BAJA = "Baja"
+    PRORROGA = "Prorroga"
+
+class AdministrativeChargesChange(Base):
+    __tablename__ = "administrative_charges_changes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    resolution_id = Column(Integer, ForeignKey("resolutions.id"))
+    tipo = Column(Enum(ChargeChangeType))
+    nombre = Column(String)
+    cargo = Column(String)
+    dni = Column(String)
+    replaces = Column(String, nullable=True)
+
 class Resolution(Base):
     __tablename__ = "resolutions"
 
@@ -21,6 +34,4 @@ class Resolution(Base):
     area = Column(String, index=True)
     texto_completo = Column(String)
     archivos = Column(JSON)
-
-# Create tables
-Base.metadata.create_all(bind=engine)
+    administrative_changes = relationship("AdministrativeChargesChange", back_populates="resolution")

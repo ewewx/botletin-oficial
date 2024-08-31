@@ -3,10 +3,11 @@ from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 from datetime import date
 from typing import List, Optional
-from sqlalchemy import create_engine, Column, Integer, String, Date, JSON
+from sqlalchemy import create_engine
+from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
-from models import Resolution
+from models import Resolution, AdministrativeChargesChange, ChargeChangeType
 from scraper import scrape_boletin_oficial
 import asyncio
 
@@ -14,9 +15,21 @@ import asyncio
 SQLALCHEMY_DATABASE_URL = "sqlite:///./boletinoficial.db"
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
 
-# Pydantic model for API
+
+AdministrativeChargesChange.resolution = relationship("Resolution", back_populates="administrative_changes")
+
+# Create tables
+Base.metadata.create_all(bind=engine)
+
+# Pydantic models for API
+class AdministrativeChargesChangeModel(BaseModel):
+    tipo: ChargeChangeType
+    nombre: str
+    dni: str
+    cargo: str
+    replaces: Optional[str] = None
+
 class ResolutionModel(BaseModel):
     fecha: date
     titulo: str
@@ -26,6 +39,10 @@ class ResolutionModel(BaseModel):
     area: str
     texto_completo: str
     archivos: List[str]
+    administrative_changes: List[AdministrativeChargesChangeModel]
+
+    class Config:
+        orm_mode = True
 
 app = FastAPI()
 

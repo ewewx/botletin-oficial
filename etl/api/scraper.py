@@ -3,7 +3,9 @@ import httpx
 from bs4 import BeautifulSoup
 from datetime import datetime
 from sqlalchemy.orm import Session
-from models import Resolution  # Import the Resolution model
+from models import Resolution, AdministrativeChargesChange, ChargeChangeType  # Import the Resolution model
+import prompt
+from typing import Dict, Any
 
 async def today_urls():
     """
@@ -63,9 +65,33 @@ async def scrape_article(article_url, db: Session):
         texto_completo=content,
         archivos=[]
     )
+
+    analysis_result = prompt.analyze(content)
+    process_analysis_result(resolution, analysis_result)
+    
     db.add(resolution)
     
-    return type, area, content, title, status
+    return resolution
+
+def process_analysis_result(resolution: Resolution, analysis_result: Dict[str, Any]):
+    for designation in analysis_result.get("designaciones", []):
+        create_administrative_change(resolution, designation, ChargeChangeType.ALTA)
+    
+    for resignation in analysis_result.get("renuncias", []):
+        create_administrative_change(resolution, resignation, ChargeChangeType.BAJA)
+    
+    for extension in analysis_result.get("prorrogas", []):
+        create_administrative_change(resolution, extension, ChargeChangeType.PRORROGA)
+
+def create_administrative_change(resolution: Resolution, data: Dict[str, Any], change_type: ChargeChangeType):
+    admin_change = AdministrativeChargesChange(
+        tipo=change_type,
+        nombre=data["nombre"],
+        cargo=data["cargo"],
+        dni=data["dni"]
+        #replaces=data.get("actas")  # Using 'actas' as 'replaces' for now
+    )
+    resolution.administrative_changes.append(admin_change)
 
 async def scrape_boletin_oficial(db: Session):
     urls, _ = await today_urls()
@@ -74,7 +100,9 @@ async def scrape_boletin_oficial(db: Session):
     
     for i, url in enumerate(urls):
         print(f"Publication {i+1} of {len(urls)}")
-        type, area, content, title, _ = await scrape_article(url, db)
+        resolution = await scrape_article(url, db)
+        print(f"Processed resolution: {resolution.titulo}")
+        print(f"Administrative changes: {len(resolution.administrative_changes)}")
     
     print('Completed Scraping')
     db.commit()
