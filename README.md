@@ -10,9 +10,8 @@ El Botelín Oficial de la República Argentina guarda información clave para el
 Presentación: [link](https://docs.google.com/presentation/d/1YMQgE1UciiV4g_BrmhzbTX_E5g2rmvBh/edit#slide=id.p1)
 <br>
 <hr>
-<h3>* Proyecto avanzando con el trabajo colaborativo del equipo de la Hackatón Media Party 2024</h3>
-
 <h4>Créditos</h4>
+<p>Con el aporte del equipo colaborativo conformado en la Hackatón Media Party 2024</p>
 
 <ul>
   <li>Sebastian Juara - Categorización y análisis de contenido</li>  
