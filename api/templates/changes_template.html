@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Botletín Oficial</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #000;
+            text-transform: lowercase;
+            text-align: center;
+        }
+        h2 {
+            color: #2c3e50;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .bajas, .altas, .prorrogas {
+            margin-bottom: 20px;
+        }
+        .bajas h3 {
+            color: #F54743;
+        }
+        .altas h3 {
+            color: #1ACC41;
+        }
+        .prorrogas h3 {
+            color: #1AA1CC;
+        }
+        .relevantes {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-left: 5px solid #3498db;
+        }
+        .note {
+            color: #777;
+            font-style: italic;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .article-date {
+            color: #666;
+        }
+        .cta-section {
+        	background-color: #e8f4fd;
+        	border: 1px solid #3498db;
+        	border-radius: 5px;
+        	padding: 20px;
+        	text-align: center;
+        	margin-top: 30px;
+    	}
+    	.cta-button {
+        	display: inline-block;
+        	background-color: #3498db;
+        	color: white;
+        	padding: 10px 20px;
+        	border-radius: 5px;
+        	text-decoration: none;
+        	font-weight: bold;
+        	margin-top: 10px;
+    	}
+    	.cta-button:hover {
+        	background-color: #2980b9;
+        	text-decoration: none;
+    	}
+
+    </style>
+</head>
+<body>
+    <h1>botletín oficial 🤖📜</h1>
+    
+    <p>¡Hola! En el boletín oficial de hoy registraron {{ bajas|length }} bajas y {{ altas|length }} altas en el gobierno nacional.</p>
+    
+    {% for ministerio, data in ministerios.items() %}
+    <div class="section">
+        <h2>{{ ministerio|title }}</h2>
+        
+        {% if data.bajas %}
+        <div class="bajas">
+            <h3>BAJAS</h3>
+            <ul>
+                {% for item in data.bajas if not item.baja_jerarquia %}
+                <li>
+                    <a href="{{ item.link_resolucion }}">{{ item.nombre | title }}</a>, {{ item.cargo }}
+                    {% if item.nota %}
+                        <span class="note">({{ item.nota }})</span>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+            
+            {% set lower_hierarchy = data.bajas|selectattr("baja_jerarquia", "equalto", true)|list %}
+            {% if lower_hierarchy %}
+            <p>También: 
+                {% for item in lower_hierarchy %}
+                <a href="{{ item.link_resolucion }}">{{ item.nombre | title }}</a>, {{ item.cargo }}{% if not loop.last %}, {% endif %}
+                {% endfor %}
+            </p>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        {% if data.altas %}
+        <div class="altas">
+            <h3>ALTAS</h3>
+            <ul>
+                {% for item in data.altas %}
+                <li>
+                    <a href="{{ item.link_resolucion }}">{{ item.nombre | title }}</a>, {{ item.cargo }}
+                    {% if item.nota %}
+                        <span class="note">({{ item.nota }})</span>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        
+        {% if data.prorrogas %}
+        <div class="prorrogas">
+            <h3>PRÓRROGAS</h3>
+            <ul>
+                {% for item in data.prorrogas %}
+                <li>
+                    <a href="{{ item.link_resolucion }}">{{ item.nombre | title }}</a>, {{ item.cargo }} 
+                    {% if item.info_prorroga %}
+                        ({{ item.info_prorroga }})
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+    
+    {% if articulos_relevantes %}
+    <div class="section relevantes">
+        <h3>Algunos artículos relevantes en Chequeado</h3>
+        <ul>
+            {% for articulo in articulos_relevantes %}
+            <li>
+                <a href="{{ articulo.link }}">{{ articulo.titulo }}</a> 
+                <span class="article-date">({{ articulo.fecha }})</span>.
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    <div class="cta-section">
+    	<h3>¿Te sirvió el botletin?</h3>
+    	<a href="#feedback-form" class="cta-button">Dar feedback</a>
+	</div>
+</body>
+</html>

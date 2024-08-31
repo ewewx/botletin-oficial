@@ -84,11 +84,17 @@ def process_analysis_result(resolution: Resolution, analysis_result: Dict[str, A
         create_administrative_change(resolution, extension, ChargeChangeType.PRORROGA)
 
 def create_administrative_change(resolution: Resolution, data: Dict[str, Any], change_type: ChargeChangeType):
+    
+    if "dni" in data:
+        dni = data["dni"]
+    else:
+        dni = null
+    
     admin_change = AdministrativeChargesChange(
         tipo=change_type,
         nombre=data["nombre"],
         cargo=data["cargo"],
-        dni=data["dni"]
+        dni=dni
         #replaces=data.get("actas")  # Using 'actas' as 'replaces' for now
     )
     resolution.administrative_changes.append(admin_change)
