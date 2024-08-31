@@ -2,21 +2,21 @@
 import os
 import time
 
-import openai
+from openai import OpenAI
+import json
+
+client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
 delimiter = "####"
 MAX_TOKENS = 4096
-openai.api_key  = os.getenv('OPENAI_API_KEY')
 
 
-def get_completion(prompt, model="gpt-3.5-turbo"):
+def get_completion(prompt, model="gpt-4o-mini"):
     messages = [{"role": "user", "content": prompt}]
-    response = openai.ChatCompletion.create(
-        model=model,
-        messages=messages,
-        temperature=0,
-    )
-    return response.choices[0].message["content"]
+    response = client.chat.completions.create(model=model,
+    messages=messages,
+    temperature=0)
+    return response.choices[0].message.content
 
 def analyze(content):
     PROMPT = """Sos un periodista político en Argentina que sigue las renuncias y designaciones de los funcionarios del Gobierno de Argentina.  
@@ -29,12 +29,19 @@ def analyze(content):
         Documento Nacional de Identidad (dni) 
         Resolución (titulo de la resolución general)
 
-        Devuelve el resultado en formato JSON, con tres listados: uno para designaciones, otro para renuncias y otro para prórrogas.
-        
+        Devuelve el resultado en formato JSON, con tres listados: uno para designaciones, otro para renuncias y otro para prorrogas.
+        Si no hay respuesta ni resolucion, devuelve un diccionario vacío. Siempre responde en formato JSON, sin usar el formating "```json", directamente el codigo json plano.
         Resolución:
         """ + content
 
-
     response = get_completion(PROMPT)
 
-    return response
+    print(response)
+
+    try:
+        analysis_result = json.loads(response)
+    except json.JSONDecodeError as e:
+        print(f"Error parsing JSON from analyze function: {e}")
+        print(f"Raw output from analyze function: {response}")
+    
+    return analysis_result

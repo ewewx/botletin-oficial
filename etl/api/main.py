@@ -16,6 +16,7 @@ SQLALCHEMY_DATABASE_URL = "sqlite:///./boletinoficial.db"
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+Base = declarative_base()
 
 AdministrativeChargesChange.resolution = relationship("Resolution", back_populates="administrative_changes")
 
