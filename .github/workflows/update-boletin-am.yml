@@ -3,6 +3,7 @@
 name: "Update Boletin README"
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: '15 4 * * 1-5'
   push:
